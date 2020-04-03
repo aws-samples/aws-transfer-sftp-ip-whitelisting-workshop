@@ -23,22 +23,22 @@ This workshop will walk you through this scenario, using CloudFormation template
 
 #### AWS Account
 
-In order to complete this workshop, you will need an AWS account with rights to create AWS IAM roles, EC2 instances, AWS DataSync, AWS Storage Gateway and CloudFormation stacks in the AWS regions you select.
+In order to complete this workshop, you will need an AWS account with rights to create an Amazon VPC, AWS CloudFormation stacks, and Amazon Transfer for SFTP servers in your selected region.
 
-It will cost approximately 3 USD to run this workshop.  It is recommended that you follow the cleanup instructions once you have completed the workshop to remove all deployed resources and limit ongoing costs to your AWS account.
+This workshop includes services that are not in the free tier, and may generate charges.  It is recommended that you follow the cleanup instructions once you have completed the workshop to remove all deployed resources and limit ongoing costs to your AWS account.
 
 #### Software
 
 - **Internet Browser**  – It is recommended that you use the latest version of Chrome or Firefox for this workshop.
+- **SFTP Client** - You will need an SFTP client for testing
 
 ## Workshop Modules
 
 This workshop consists of the following five modules:
 
-- **Module 1**  - Deploy resources in the on-premises and in-cloud regions
-- **Module 2** - Initial file copy to S3 using DataSync
-- **Module 3**  - Access S3 bucket on-premises using File Gateway
-- **Module 4**  - One last incremental copy before cutover
-- **Module 5** - Cutover to File Gateway and shutdown the NFS server
+- **Module 1** - Complete Setup
+- **Module 2** - Complete Optional Setup
+- **Module 3** - Test Your Setup
+- **Module 4** - Clean Up
 
-To get started, go to [Module 1](/workshops/nfs-migration/module1).
+To get started, go to [Module 1](/module1/README.md).
