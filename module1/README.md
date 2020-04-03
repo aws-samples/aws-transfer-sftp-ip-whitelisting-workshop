@@ -41,7 +41,7 @@ Note: While this solution uses Elastic IP addresses, you can also use EC2 BYOIP 
 
 Once the AWS CloudFormation stack has been created, you see the following in the outputs tab:
 
-![](images/image2.jpg)
+![](images/transfer1.png)
 
 ## Module Summary
 
