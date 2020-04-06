@@ -37,16 +37,47 @@ In this module, you will use CloudFormation scripts to deploy resources in an AW
 
 The template allocates two Elastic IP addresses while creating a VPC, two subnets, and an Internet Gateway. AWS SFTP uses a Multi-AZ architecture to achieve high availability. By creating two subnets and assigning an Elastic IP address to each, your SFTP service is able to withstand the loss of an Availability Zone.
 
-Note: While this solution uses Elastic IP addresses, you can also use EC2 BYOIP to import your own static IP addresses.  The BYOIP feature is particularly useful when you are migrating from an existing SFTP server and you must maintain the same endpoint IP addresses.
+**Note:** While this solution uses Elastic IP addresses, you can also use EC2 BYOIP to import your own static IP addresses.  The BYOIP feature is particularly useful when you are migrating from an existing SFTP server and you must maintain the same endpoint IP addresses.
 
 Once the AWS CloudFormation stack has been created, you see the following in the outputs tab:
 
-![](images/transfer1.png)
+![](../images/transfer1.png)
+
+You can see the ID of the VPC, the Availability Zones the subnets were created in, as well as the Elastic IP addresses.  With these resources created, you can now proceed to create your AWS SFTP server.
+
+First, go to the [AWS SFTP Management Console](https://console.aws.amazon.com/transfer/) and choose **Create Server**. Then, under **Endpoint Configuration**, select **VPC** for a VPC hosted endpoint. In this exercise, you are creating an Internet Facing server, so select that option. From the VPC drop-down menu, select the VPC with the ID you noted from the outputs of your AWS CloudFormation template. Optionally, you can assign a **Custom hostname** that can be used by your clients to connect to your endpoint. In this example, we will use the service supplied hostname (details in the next section on how this relates to your Elastic IPs). See the following screenshot for reference:
+
+![](../images/transfer2.png)
+
+Once you have selected your VPC, you see that the only two **Availability Zones** you may choose are the ones your AWS CloudFormation template selected to create your subnets. Select each of those, then select your
+**subnet ID** in the left drop-down menu and one of your **Elastic IPs** in the right drop-down menu for each Availability Zone:
+
+![](../images/transfer3.png)
+
+**Note:** The service lets you choose up to three Availability Zones and it is recommended that you choose more than one Availability Zone for HA purposes.
+
+Once everything is selected as shown above, choose the **Create server** button. It takes a few minutes to create your SFTP server. When the creation is complete, and the server status shows as **Online**, select the new server to get more information.
+
+![](../images/transfer4.png)
+
+In the preceding screenshot, you can see two key resources that were automatically created by the service.  
+
+First, because you chose to deploy the server in your VPC, a VPC endpoint was automatically created by the service (as shown above under “**Endpoint type**”).  All network traffic to and from the SFTP server passes through this endpoint.  You apply **Security Groups** to this endpoint to whitelist SFTP clients.  
+
+Second, because you chose to make your server internet facing, a DNS name was supplied for your server. This DNS name is the hostname that SFTP clients use to access the server (as shown under “**Endpoint**”).  AWS SFTP automatically created an alias record for the DNS name of the form “<serverid>.transfer.<region>.amazonaws.com.” An ANAME record was created that includes the two Elastic IP addresses you assigned to the server.  The service Console provides you the option to assign your custom domain as the hostname your clients can use to access your endpoint using **Route 53 CNAME**.
+
+By default, your VPC’s security group is assigned to the endpoint. You can create and use a different Security Group where you eventually whitelist your client IP address for access to the SFTP server.  Go to the **VPC** service in the [AWS Management Console](https://aws.amazon.com/console/) and select **Security Groups**.  At the top of the page, choose **Create security group**. On the following page, specify a name and description, and then assign the security group to the VPC created by the AWS CloudFormation template. Choose Create to create the security group. Once this Security Group is created, you must assign it to your VPC endpoint as well. Return to the console page for your AWS SFTP server. Under **Endpoint type**, follow the link for your VPC endpoint (vpce-<endpointid>). This launches the Endpoints console page for your VPC endpoint. From the **Security Groups** tab, select **Edit Security Groups**. See the following screenshot for an example:
+
+![](../images/transfer5.png)
+
+On the **Manage security groups** page, uncheck the box for the **default VPC security group**, and check the box for your newly created Security Group. Select **Save** to complete the process.
 
 ## Module Summary
 
-In this module, you deployed all of the resources necessary to complete this workshop in both the on-premises region and the in-cloud region.  You have also mounted the NFS export on the Application server and verified your data set.
+In this module, you deployed all of the resources necessary to complete the configuration of a **VPC hosted endpoint** of an **AWS Transfer for SFTP server**. The next module is an optional exercise, where you can learn to expose this same endpoint via its private IP space to internal and external users whose traffic originates inside of AWS. If you do not wish to explore this use case, you can skip on to Module 3, where you will be testing your newly created endpoint.
 
 In the next module, you will create a DataSync task to do an initial copy of files from the NFS server to the S3 bucket.
 
-Go to [Module 2](/workshops/nfs-migration/module2).
+Go to [Module 2](/module2/README.md).
+
+Skip this optional step and go to [Module 3](/module3/README.md).
