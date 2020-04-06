@@ -9,35 +9,32 @@ Errors or corrections? Contact [russboye@amazon.com](mailto:russboye@amazon.com)
 
 ---
 
-# Module 3
-## Testing your configuration
+# Module 4
+## Cleaning up after this workshop
 
-In this module, you will test access to your SFTP server either via your terminal on Linux or MacOS systems, or by using a third-party tool such as Cyberduck, WinSCP, or Filezilla. Before attempting to connect to the server, you must first return to the AWS SFTP console page for your server to [create a user account](https://docs.aws.amazon.com/transfer/latest/userguide/getting-started-add-user.html).
-
-**Note:** Our example uses a Service-managed identity provider for the SFTP server, which authenticates users using SSH keys.  AWS Transfer for SFTP also supports custom authentication methods, which allows you to do [password authentication](https://aws.amazon.com/blogs/storage/enable-password-authentication-for-aws-transfer-for-sftp-using-aws-secrets-manager/), as well as authentication via [3rd party providers](https://aws.amazon.com/blogs/storage/using-okta-as-an-identity-provider-with-aws-transfer-for-sftp/).
+In this module, you will clean up after completing this workshop. Cleaning up is critical, as components of this workshop fall outside of the free tier, and additional charges will accrue if you do not delete the resources created while completing the workshop.
 
 ## Module Steps
 
-#### Test your Connection
+#### Cleaning Up
 
-Once you’ve created a user account, you’re able to attempt to connect to your SFTP server using the private key that corresponds with the public key used during user creation. Using the hostname of your SFTP server, try to connect using your preferred SFTP client. At this point, you should experience a timeout, such as the one shown in the following screenshot. This is because your IP address has not been configured to reach the VPC over the appropriate port.
-
-![](../images/transfer8.png)
-
-Return to the settings page in the AWS Management Console for the Security Group you created earlier. On the settings page, choose the **Inbound Rules** tab, and choose **Edit Rules**. Select **SSH** as the **Type** - this automatically selects the appropriate protocol and port range for SFTP.  For the purposes of this exercise, select **My IP** under **Source** - this automatically populates the IP address from which you logged into the console. Enter a description, and choose **Save Rules**:
-
-![](../images/transfer9.png)
-
-Once you have added the new rule to your security group, select **Close**. You now see an inbound rule in your security group that gives your IP address access to your VPC via port 22, which gives you access to your SFTP server.
-
-Now that this rule is in place, attempt to connect to your session again from your SFTP client. As shown in the following screenshot, you should now be able to connect to your SFTP session. Optionally you can upload a file and view it in the S3 console.
-
-![](../images/transfer10.png)
+To clean up the resources you created as part of this post, you want to delete your **AWS SFTP** server. Additionally, you will need to clean up the **Security Group** that you manually created in **Module 1** of the workshop. Once the server and Security Group have been deleted, you can then proceed to delete the **AWS CloudFormation stack** that you deployed in Module 1. Taking these steps ensures you incur no additional costs from following along with this post.
 
 ## Module Summary
 
-In this module, you tested your ability to reach your AWS Transfer for SFTP server endpoint both with and without your IP address whitelisted. This demonstrates that non whitelisted traffic does not, in fact, actually even reach your AWS SFTP endpoint.
+In this module, cleaned up after this workshop to ensure no additional charges are incurred.
 
 In the next module, you will clean up the resources deployed in this workshop, to prevent incurring any additional charges.
 
-Go to [Module 4](/workshops/nfs-migration/module2).
+### Workshop Summary
+
+In this workshop, we showed you how to use **VPC Security Groups** to whitelist access to your **AWS SFTP** servers. First we deployed an **AWS CloudFormation template** to configure the needed network elements to configure the sample architecture. Next, we created a new **AWS SFTP server** with an endpoint hosted inside a **VPC**. Then, we demonstrated how to use the **Security Group** associated with that VPC to whitelist access to your server endpoint only to specific IPs, and optionally to peered VPCs inside or outside your account.
+
+Using these features, you can limit **AWS Transfer for SFTP** endpoint access to the IPs of your trusted customers and business partners. This adds an additional layer of security, and in addition to the authentication mechanisms supported by **AWS SFTP**, prevents unknown or untrusted entities from even reaching the endpoint. Additionally, a major benefit to hosting the endpoint with two Elastic IPs is that it gives your customers the ability to filter SFTP outbound when their firewalls don’t support URL-based filtering. These benefits can be helpful when working with tightly regulated data such as financial records or Personal Health Information (PHI).
+
+To learn more about **AWS Transfer for SFTP**, check out the following links:
+
+*	[AWS Transfer for SFTP product page](https://aws.amazon.com/sftp/)
+*	[AWS Transfer for SFTP documentation](https://docs.aws.amazon.com/transfer/latest/userguide/what-is-aws-transfer-for-sftp.html)
+
+Go to [Workshop Home](/README.md).

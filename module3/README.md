@@ -40,4 +40,4 @@ In this module, you tested your ability to reach your AWS Transfer for SFTP serv
 
 In the next module, you will clean up the resources deployed in this workshop, to prevent incurring any additional charges.
 
-Go to [Module 4](/workshops/nfs-migration/module2).
+Go to [Module 4](/module4/README.md).
