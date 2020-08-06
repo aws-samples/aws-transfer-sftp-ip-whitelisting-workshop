@@ -1,0 +1,148 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: AWS DataSync Workshop - NFS Migration - On-Premises Region
+Metadata:
+  License:
+    Description: |
+      Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+
+      Permission is hereby granted, free of charge, to any person obtaining a copy of this
+      software and associated documentation files (the "Software"), to deal in the Software
+      without restriction, including without limitation the rights to use, copy, modify,
+      merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+      permit persons to whom the Software is furnished to do so.
+
+      THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+      INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+      PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+      HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+      OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+      SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+# NOTE: Uncomment the following and all lines that reference the kp parameter
+# if you need a key pair for the various instances below
+#
+#   AWS::CloudFormation::Interface:
+#     ParameterGroups:
+#       - Label:
+#           default: Security
+#         Parameters:
+#           - kp
+#     ParameterLabels:
+#       kp:
+#         default: 'Access Key Pair:'
+#
+# Parameters:
+#   kp:
+#     Description: '(NOTE: If you don''t see a key in the list you will need to create
+#       one from the EC2 console in this region)'
+#     Type: AWS::EC2::KeyPair::KeyName
+
+# We use this to get the latest, correct AMI for the region we are in.
+# This avoids outdated AMIs.
+
+Resources:
+
+  # Create a dedicated VPC with internet connectivity
+  sftpVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.11.12.0/24
+      EnableDnsSupport: 'true'
+      EnableDnsHostnames: 'true'
+      InstanceTenancy: default
+      Tags:
+      - Key: Name
+        Value: TransferSFTPDemoVPC
+  sftpSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref 'sftpVPC'
+      CidrBlock: 10.11.12.0/25
+      AvailabilityZone:
+        Fn::Select:
+          - 0
+          - Fn::GetAZs: ""
+      MapPublicIpOnLaunch: 'True'
+      Tags:
+      - Key: Name
+        Value: TransferSFTPDemoSubnet1
+  sftpSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref 'sftpVPC'
+      CidrBlock: 10.11.12.128/25
+      AvailabilityZone:
+        Fn::Select:
+          - 1
+          - Fn::GetAZs: ""
+      MapPublicIpOnLaunch: 'True'
+      Tags:
+      - Key: Name
+        Value: TransferSFTPDemoSubnet2
+  sftpInternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+      - Key: Name
+        Value: TransferSFTPDemoIGW
+  sftpAttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref 'sftpVPC'
+      InternetGatewayId: !Ref 'sftpInternetGateway'
+  sftpRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref 'sftpVPC'
+      Tags:
+      - Key: Name
+        Value: TransferSFTPDemoRouteTable
+  sftpSubnet1RouteAssociaton:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref 'sftpSubnet1'
+      RouteTableId: !Ref 'sftpRouteTable'
+  sftpSubnet2RouteAssociaton:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref 'sftpSubnet2'
+      RouteTableId: !Ref 'sftpRouteTable'
+  sftpRoutetoInternet:
+    Type: AWS::EC2::Route
+    DependsOn: sftpInternetGateway
+    Properties:
+      RouteTableId: !Ref 'sftpRouteTable'
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref 'sftpInternetGateway'
+  sftpEIP1:
+    Type: AWS::EC2::EIP
+    DependsOn: sftpVPC
+    Properties:
+      Domain: sftpVPC
+  sftpEIP2:
+    Type: AWS::EC2::EIP
+    DependsOn: sftpVPC
+    Properties:
+      Domain: sftpVPC
+Outputs:
+  vpcID:
+    Description: ID of VPC
+    Value: !Ref sftpVPC
+  elasticIP1:
+    Description: Elastic IP 1
+    Value: !Ref sftpEIP1
+  elasticIP2:
+    Description: Elastic IP 2
+    Value: !Ref sftpEIP2
+  subnet1VPC:
+    Description: AZ of subnet 1
+    Value: !GetAtt sftpSubnet1.AvailabilityZone
+  subnet1ID:
+    Description: ID of Subnet 1
+    Value: !Ref sftpSubnet1
+  subnet2VPC:
+    Description: AZ of subnet 2
+    Value: !GetAtt sftpSubnet2.AvailabilityZone
+  subnet2ID:
+    Description: ID of Subnet 2
+    Value: !Ref sftpSubnet2
