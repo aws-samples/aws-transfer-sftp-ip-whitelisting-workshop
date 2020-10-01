@@ -34,6 +34,6 @@ In order to allow traffic from other VPCs to reach your SFTP server, you want to
 
 In this module, you established a peering session with another **VPC**, and Added the appropriate routes for your **AWS Transfer for SFTP** server's endpoint to be available to this peered VPC without traversing public IP space.
 
-In the next module, you will test your AWS Transfer for SFTP endpoint whitelisting capability.
+In the next module, you will test your **AWS Transfer for SFTP** endpoint whitelisting capability.
 
 Go to [Module 3](/module3/README.md).
