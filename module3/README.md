@@ -48,7 +48,7 @@ Return to the settings page in the AWS Management Console for the Security Group
 
 ![](../images/transfer9.png)
 
-Once you have added the new rule to your security group, select **Close**. You now see an inbound rule in your security group that gives your IP address access to your VPC via port 22, which gives you access to your SFTP server.
+You will now see an inbound rule in your security group that gives your IP address access to your VPC via port 22, which gives you access to your SFTP server.
 
 Now that this rule is in place, attempt to connect to your session again from your SFTP client. As shown in the following screenshot, you should now be able to connect to your SFTP session. Optionally you can upload a file and view it in the S3 console.
 
