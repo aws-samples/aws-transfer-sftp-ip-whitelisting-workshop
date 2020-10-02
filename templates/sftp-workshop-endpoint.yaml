@@ -18,28 +18,6 @@ Metadata:
       OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
       SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-# NOTE: Uncomment the following and all lines that reference the kp parameter
-# if you need a key pair for the various instances below
-#
-#   AWS::CloudFormation::Interface:
-#     ParameterGroups:
-#       - Label:
-#           default: Security
-#         Parameters:
-#           - kp
-#     ParameterLabels:
-#       kp:
-#         default: 'Access Key Pair:'
-#
-# Parameters:
-#   kp:
-#     Description: '(NOTE: If you don''t see a key in the list you will need to create
-#       one from the EC2 console in this region)'
-#     Type: AWS::EC2::KeyPair::KeyName
-
-# We use this to get the latest, correct AMI for the region we are in.
-# This avoids outdated AMIs.
-
 Resources:
 
   # Create a dedicated VPC with internet connectivity
@@ -124,7 +102,141 @@ Resources:
     DependsOn: sftpVPC
     Properties:
       Domain: sftpVPC
+  s3Bucket1:
+    Type: AWS::S3::Bucket
+    Properties:
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: True
+        BlockPublicPolicy: True
+        IgnorePublicAcls: True
+        RestrictPublicBuckets: True
+      BucketName: !Join
+      - "-"
+      - - "transferworkshop1"
+        - !Select
+          - 2
+          - !Split
+            - "/"
+            - !Ref "AWS::StackId"
+  s3Bucket2:
+    Type: AWS::S3::Bucket
+    Properties:
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: True
+        BlockPublicPolicy: True
+        IgnorePublicAcls: True
+        RestrictPublicBuckets: True
+      BucketName: !Join
+      - "-"
+      - - "transferworkshop2"
+        - !Select
+          - 2
+          - !Split
+            - "/"
+            - !Ref "AWS::StackId"
+  s3Bucket1IamRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action:
+              - sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service:
+                - transfer.amazonaws.com
+        Version: '2012-10-17'
+  s3Bucket1RolePolicy:
+    Type: AWS::IAM::Policy
+    DependsOn: s3Bucket1
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Effect: Allow
+            Resource:
+              - !GetAtt s3Bucket1.Arn
+              - !Join [ "/", [ !GetAtt s3Bucket1.Arn, "*" ] ]
+            Action:
+              - s3:*
+        Version: '2012-10-17'
+      PolicyName: policy
+      Roles:
+        - !Ref 's3Bucket1IamRole'
+  s3Bucket2IamRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action:
+              - sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service:
+                - transfer.amazonaws.com
+        Version: '2012-10-17'
+  s3Bucket2RolePolicy:
+    Type: AWS::IAM::Policy
+    DependsOn: s3Bucket1
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Effect: Allow
+            Resource:
+              - !GetAtt s3Bucket2.Arn
+              - !Join [ "/", [ !GetAtt s3Bucket2.Arn, "*" ] ]
+            Action:
+              - s3:*
+        Version: '2012-10-17'
+      PolicyName: policy
+      Roles:
+        - !Ref 's3Bucket1IamRole'
+  s3BucketallIamRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action:
+              - sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service:
+                - transfer.amazonaws.com
+        Version: '2012-10-17'
+  s3BucketallRolePolicy:
+    Type: AWS::IAM::Policy
+    DependsOn: s3Bucket2
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Effect: Allow
+            Resource:
+              - !GetAtt s3Bucket1.Arn
+              - !GetAtt s3Bucket2.Arn
+              - !Join [ "/", [ !GetAtt s3Bucket1.Arn, "*" ] ]
+              - !Join [ "/", [ !GetAtt s3Bucket2.Arn, "*" ] ]
+            Action:
+              - s3:*
+        Version: '2012-10-17'
+      PolicyName: policy
+      Roles:
+        - !Ref 's3BucketallIamRole'
+
 Outputs:
+  bucket1Name:
+    Description: S3 Bucket 1 Name
+    Value: !Ref s3Bucket1
+  iamRole1ForS3Access:
+    Description: S3 IAM Role for Transfer and File Gateway
+    Value: !GetAtt s3Bucket1IamRole.Arn
+  bucket2Name:
+    Description: S3 Bucket 2 Name
+    Value: !Ref s3Bucket2
+  iamRole2ForS3Access:
+    Description: S3 IAM Role for Transfer and File Gateway
+    Value: !GetAtt s3Bucket2IamRole.Arn
+  iamRoleallForS3Access:
+    Description: S3 IAM Role for Transfer and File Gateway
+    Value: !GetAtt s3BucketallIamRole.Arn
   vpcID:
     Description: ID of VPC
     Value: !Ref sftpVPC

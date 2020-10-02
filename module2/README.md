@@ -28,7 +28,7 @@ Select your Transfer server by checking the box next to it, and click **Add user
 
 ![](../images/transfer11.png)
 
-On the Add user page, fill in a Username (here we use standard as the username), and select the *transferworkshop-s3Bucket1* role that the cloudformation template created in Module 1. For now we will not be using a Scope down policy, so leave None checked. 
+On the Add user page, fill in a Username (here we use **standard** as the username), and select the *AWSTransferWorkshopOct2020-s3Bucket1IamRole* role that the cloudformation template created in Module 1. For now we will not be using a Scope down policy, so leave None checked. 
 
 ![](../images/transfer12.png)
 
@@ -52,9 +52,13 @@ Now that this rule is in place, attempt to connect to your session again from yo
 
 ![](../images/transfer14.png)
 
- Optionally you can upload a file and view it in the S3 console.
+ Optionally you can upload a file using your SFTP client:
 
 ![](../images/transfer10.png)
+
+And then view it in the **Amazon S3** console
+
+![](../images/transfer27.png)
 
 ## Module Summary
 

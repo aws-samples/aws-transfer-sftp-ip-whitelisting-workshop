@@ -26,32 +26,39 @@ The following table lays out the structure we will be building for our organizat
 
   | **Username** | **Role** | **Bucket 1 Folders** | **Bucket 2 Folders** |
   | --- | --- | --- | --- |
-  | user1 | External End User | /firm1, /common | --- |
-  | user2 | External End User | /firm2, /common | --- |
-  | admin | Internal Super User | /firm1, /firm2, /common | /rawdata, /processed |
+  | user1 | External End User | /user1, /common | --- |
+  | user2 | External End User | /user2, /common | --- |
   | regulator | External Super User | --- | /rawdata, /processed |
+  | admin | Internal Super User | /user1, /user2, /common | /rawdata, /processed |
+  
 
-Before we create the user accounts, we should create the directories listed in the table above. 
+Before we create the user accounts, we should create the directories listed in the table above inside of **Amazon S3** buckets. From the **Amazon S3** console, click on *awstransferworkshopbucket1*, and inside the bucket click **Create folder**. Supply the folder name for each folder in each bucket in the table above, and for each one click **Save**
 
-In order to create these user accounts, from the command line of a linux server we can execute the following bash script, substituting values from your environment in place of the *variables*
+![](../images/transfer28.png)
+
+In order to create the user accounts, from the command line of a linux server we can execute the following bash scripts, substituting values from your environment in place of the *variables*. These scripts are designed to use the name of the transfer server as a supplied variable on execution, which can be retrieved from your **AWS Transfer Family** console page
 
 #### For user1
 
 <code>
-[root@ip-172-31-41-252 ~]# cat create_user.sh
+[root@ip-172-31-41-252 ~]# cat create_user1.sh
 #! /bin/sh
 
-role_arn=`aws iam list-roles | grep -e "Arn.*transferworkshop-s3Bucket1IamRole-Q5W2BOA6ATBQ*" | awk '{print $2}' | sed -e 's/[,"]//g'`
+role_arn=`aws iam list-roles | grep -e "Arn.*AWSTransferWorkshopOct2020-s3Bucket1IamRole-6CA6GL68EO5S" | awk '{print $2}' | sed -e 's/[,"]//g'`
 server_id=$1
 pub_key=`cat demokey.pub`
 
-mapping_1='Entry=/user1,Target=/transferworkshop1-1908cf20-044e-11eb-8ea9-027209769fbe/user1'
-mapping_2='Entry=/user1temp,Target=/transferworkshop1-1908cf20-044e-11eb-8ea9-027209769fbe/temp'
+mapping_1='Entry=/user1,Target=/awstransferworkshopbucket1-4be953a0-04e0-11eb-a8b7-0656208217bc/user1'
+mapping_2='Entry=/user1temp,Target=/awstransferworkshopbucket1-4be953a0-04e0-11eb-a8b7-0656208217bc/common'
 
 aws transfer create-user --user-name user1 --server-id $server_id --role $role_arn --home-directory-type LOGICAL --home-directory-mappings $mapping_1 $mapping_2 --region us-east-2
 
 aws transfer import-ssh-public-key --user-name user1 --server-id $server_id --ssh-public-key-body "$pub_key" --region us-east-2
 </code>
+
+You should expect to see some output if the script was successful
+
+![](../images/transfer29.png)
 
 #### Test your Connection
 
@@ -66,15 +73,15 @@ Also, try viewing those uploads in the **Amazon S3** console.
 #### For user2
 
 <code>
-[root@ip-172-31-41-252 ~]# cat create_user.sh
+[root@ip-172-31-41-252 ~]# cat create_user2.sh
 #! /bin/sh
 
-role_arn=`aws iam list-roles | grep -e "Arn.*transferworkshop-s3Bucket1IamRole-Q5W2BOA6ATBQ*" | awk '{print $2}' | sed -e 's/[,"]//g'`
+role_arn=`aws iam list-roles | grep -e "Arn.*AWSTransferWorkshopOct2020-s3Bucket1IamRole-6CA6GL68EO5S" | awk '{print $2}' | sed -e 's/[,"]//g'`
 server_id=$1
 pub_key=`cat demokey.pub`
 
-mapping_1='Entry=/user2,Target=/transferworkshop1-1908cf20-044e-11eb-8ea9-027209769fbe/user2'
-mapping_2='Entry=/user2temp,Target=/transferworkshop1-1908cf20-044e-11eb-8ea9-027209769fbe/temp'
+mapping_1='Entry=/user2,Target=/awstransferworkshopbucket1-4be953a0-04e0-11eb-a8b7-0656208217bc/user2'
+mapping_2='Entry=/user2temp,Target=/awstransferworkshopbucket1-4be953a0-04e0-11eb-a8b7-0656208217bc/common'
 
 aws transfer create-user --user-name user2 --server-id $server_id --role $role_arn --home-directory-type LOGICAL --home-directory-mappings $mapping_1 $mapping_2 --region us-east-2
 
@@ -83,7 +90,9 @@ aws transfer import-ssh-public-key --user-name user2 --server-id $server_id --ss
 
 #### Test your Connection
 
-Once you’ve created the user2 account, continue to test between each user, experimenting with what directories can be viewed and accessed on login. An important here is that the folder /temp in the first bucket is common across both users, but the **Logical Directory** for each maps to a different folder. This allows us to obscure the real name of the folder from the user logging in. In this case, this folder represents an area where different users downstream can share files with each other, without having direct **Amazon S3** Bucket access, or needing the ability to edit permissions.
+Once you’ve created the user2 account, continue to test between each user, experimenting with what directories can be viewed and accessed on login. An important here is that the folder /common in the first bucket is common across both users, but the **Logical Directory** for each maps to a different folder name. This allows us to obscure the real name of the folder from the user logging in. In this case, this folder represents an area where different users downstream can share files with each other, without having direct **Amazon S3** Bucket access, or needing the ability to edit permissions.
+
+![](../images/transfer30.png)
 
 #### For regulator
 
@@ -93,12 +102,12 @@ The code for creating the regulator access is slightly different, since both fol
 [root@ip-172-31-41-252 ~]# cat create_userreg.sh
 #! /bin/sh
 
-role_arn=`aws iam list-roles | grep -e "Arn.*transferworkshop-s3Bucket2IamRole-JGINRW7GI7KU" | awk '{print $2}' | sed -e 's/[,"]//g'`
+role_arn=`aws iam list-roles | grep -e "Arn.*AWSTransferWorkshopOct2020-s3Bucket2IamRole-1GEPCONZOVSF" | awk '{print $2}' | sed -e 's/[,"]//g'`
 server_id=$1
 pub_key=`cat demokey.pub`
 
-mapping_1='Entry=/regulator,Target=/transferworkshop2-1908cf20-044e-11eb-8ea9-027209769fbe/processed'
-mapping_2='Entry=/rawdata,Target=/transferworkshop2-1908cf20-044e-11eb-8ea9-027209769fbe/rawdata'
+mapping_1='Entry=/rawdata,Target=/awstransferworkshopbucket2-4be953a0-04e0-11eb-a8b7-0656208217bc/rawdata'
+mapping_2='Entry=/processed,Target=/awstransferworkshopbucket2-4be953a0-04e0-11eb-a8b7-0656208217bc/processed'
 
 aws transfer create-user --user-name regulator --server-id $server_id --role $role_arn --home-directory-type LOGICAL --home-directory-mappings $mapping_1 $mapping_2 --region us-east-2
 
@@ -120,15 +129,15 @@ The code for creating the admin account for full access is again different, but 
 [root@ip-172-31-41-252 ~]# cat create_useradmin.sh
 #! /bin/sh
 
-role_arn=`aws iam list-roles | grep -e "Arn.*transferworkshop-s3BucketallIamRole-NSKR00YY8TAY" | awk '{print $2}' | sed -e 's/[,"]//g'`
+role_arn=`aws iam list-roles | grep -e "Arn.*AWSTransferWorkshopOct2020-s3BucketallIamRole-17L5BZ9RNZNO1" | awk '{print $2}' | sed -e 's/[,"]//g'`
 server_id=$1
 pub_key=`cat demokey.pub`
 
-mapping_1='Entry=/user1,Target=/transferworkshop1-569551d0-0460-11eb-a96d-0af404eb93fe/user1'
-mapping_2='Entry=/user2,Target=/transferworkshop1-569551d0-0460-11eb-a96d-0af404eb93fe/user2'
-mapping_3='Entry=/common,Target=/transferworkshop1-569551d0-0460-11eb-a96d-0af404eb93fe/common'
-mapping_4='Entry=/processed,Target=/transferworkshop2-569551d0-0460-11eb-a96d-0af404eb93fe/processed'
-mapping_5='Entry=/rawdata,Target=/transferworkshop2-569551d0-0460-11eb-a96d-0af404eb93fe/rawdata'
+mapping_1='Entry=/user1,Target=/awstransferworkshopbucket1-4be953a0-04e0-11eb-a8b7-0656208217bc/user1'
+mapping_2='Entry=/user2,Target=/awstransferworkshopbucket1-4be953a0-04e0-11eb-a8b7-0656208217bc/user2'
+mapping_3='Entry=/common,Target=/awstransferworkshopbucket1-4be953a0-04e0-11eb-a8b7-0656208217bc/common'
+mapping_4='Entry=/rawdata,Target=/awstransferworkshopbucket2-4be953a0-04e0-11eb-a8b7-0656208217bc/rawdata'
+mapping_5='Entry=/processed,Target=/awstransferworkshopbucket2-4be953a0-04e0-11eb-a8b7-0656208217bc/processed'
 
 aws transfer create-user --user-name admin --server-id $server_id --role $role_arn --home-directory-type LOGICAL --home-directory-mappings $mapping_1 $mapping_2 $mapping_3 $mapping_4 $mapping_5 --region us-east-2
 
@@ -138,6 +147,8 @@ aws transfer import-ssh-public-key --user-name admin --server-id $server_id --ss
 #### Test your Connection
 
 Once you’ve created the admin account, continue to test between each user, experimenting with what directories can be viewed and accessed on login. This user represents a super user, and as such has access to all the directories. Additionally, this demonstrates the concept of spanning **Logical Directories** across multiple **Amazon S3** buckets.
+
+![](../images/transfer31.png)
 
 ## Module Summary
 

@@ -18,17 +18,27 @@ In this module, you will clean up after completing this workshop. Cleaning up is
 
 #### Cleaning Up
 
-To clean up the resources you created as part of this post, you want to delete your **AWS SFTP** server. Additionally, you will need to clean up the **Security Group** that you manually created in **Module 1** of the workshop. Once the server and Security Group have been deleted, you can then proceed to delete the **AWS CloudFormation stack** that you deployed in Module 1. Taking these steps ensures you incur no additional costs from following along with this post.
+The first thing we will clean up is our **Amazon S3** bucket contents. This is a prerequisite step, as we will not be able to delete our buckets until they are empty. From the **Amazon S3** console page, click the name of your first bucket, *awstransferworkshopbucket1* and once in the bucket, check the box to check all objects and folders (next to **Name**). From the **Actions** dropdown, select delete, then choose **Delete**
+
+![](../images/transfer32.png)
+
+The next thing we will want to delete is our **AWS Transfer** server itself, but first we will need to stop it. From the **Amazon Transfer Family** console page, check the box next to your server, and from the **Actions** dropdown, choose **Stop**
+
+![](../images/transfer33.png)
+
+Once the **AWS Transfer** server is **Offline**, you can check the same box, and from the **Actions** dropdown select Delete, type *delete* to confirm, and choose **Delete**
+
+![](../images/transfer34.png)
 
 ## Module Summary
 
-In this module, cleaned up after this workshop to ensure no additional charges are incurred.
-
-In the next module, you will clean up the resources deployed in this workshop, to prevent incurring any additional charges.
+In this module, we cleaned up after this workshop to ensure no additional charges are incurred.
 
 ### Workshop Summary
 
-In this workshop, we showed you how to use **VPC Security Groups** to whitelist access to your **AWS SFTP** servers. First we deployed an **AWS CloudFormation template** to configure the needed network elements to configure the sample architecture. Next, we created a new **AWS SFTP server** with an endpoint hosted inside a **VPC**. Then, we demonstrated how to use the **Security Group** associated with that VPC to whitelist access to your server endpoint only to specific IPs, and optionally to peered VPCs inside or outside your account.
+In this workshop, we showed you how to use **VPC Security Groups** to whitelist access to your **AWS Transfer Family** servers. First we deployed an **AWS CloudFormation template** to configure the needed network elements to configure the sample architecture. Next, we created a new **AWS Transfer server** with an endpoint hosted inside a **VPC**. Then, we demonstrated how to use the **Security Group** associated with that VPC to whitelist access to your server endpoint only to specific IPs, and optionally to peered VPCs inside or outside your account.
+
+Next we used **Logical Directories** to create an organization of different users who all had slightly different access, including one user that had access to folders in multiple **Amazon S3** buckets. 
 
 Using these features, you can limit **AWS Transfer for SFTP** endpoint access to the IPs of your trusted customers and business partners. This adds an additional layer of security, and in addition to the authentication mechanisms supported by **AWS SFTP**, prevents unknown or untrusted entities from even reaching the endpoint. Additionally, a major benefit to hosting the endpoint with two Elastic IPs is that it gives your customers the ability to filter SFTP outbound when their firewalls don’t support URL-based filtering. These benefits can be helpful when working with tightly regulated data such as financial records or Personal Health Information (PHI).
 
