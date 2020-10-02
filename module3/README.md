@@ -109,6 +109,36 @@ aws transfer import-ssh-public-key --user-name regulator --server-id $server_id 
 
 Once you’ve created the regulator account, continue to test between each user, experimenting with what directories can be viewed and accessed on login.
 
+#### For admin
+
+The code for creating the admin account for full access is again different, but in this section special attention should be given to a couple of things:
+
+1. This user has access to folders in both buckets, and will need a role that allows for this access. 
+2. This user has full access to all folders, and needs several more mappings parameters. 
+
+<code>
+[root@ip-172-31-41-252 ~]# cat create_useradmin.sh
+#! /bin/sh
+
+role_arn=`aws iam list-roles | grep -e "Arn.*transferworkshop-s3BucketallIamRole-NSKR00YY8TAY" | awk '{print $2}' | sed -e 's/[,"]//g'`
+server_id=$1
+pub_key=`cat demokey.pub`
+
+mapping_1='Entry=/user1,Target=/transferworkshop1-569551d0-0460-11eb-a96d-0af404eb93fe/user1'
+mapping_2='Entry=/user2,Target=/transferworkshop1-569551d0-0460-11eb-a96d-0af404eb93fe/user2'
+mapping_3='Entry=/common,Target=/transferworkshop1-569551d0-0460-11eb-a96d-0af404eb93fe/common'
+mapping_4='Entry=/processed,Target=/transferworkshop2-569551d0-0460-11eb-a96d-0af404eb93fe/processed'
+mapping_5='Entry=/rawdata,Target=/transferworkshop2-569551d0-0460-11eb-a96d-0af404eb93fe/rawdata'
+
+aws transfer create-user --user-name admin --server-id $server_id --role $role_arn --home-directory-type LOGICAL --home-directory-mappings $mapping_1 $mapping_2 $mapping_3 $mapping_4 $mapping_5 --region us-east-2
+
+aws transfer import-ssh-public-key --user-name admin --server-id $server_id --ssh-public-key-body "$pub_key" --region us-east-2
+</code>
+
+#### Test your Connection
+
+Once you’ve created the admin account, continue to test between each user, experimenting with what directories can be viewed and accessed on login. This user represents a super user, and as such has access to all the directories. Additionally, this demonstrates the concept of spanning **Logical Directories** across multiple **Amazon S3** buckets.
+
 ## Module Summary
 
 In this module, you created several users to represent some common organizational structures encountered in real world workloads. This should give you a good idea of how to control user access across multiple folders, which may be common amongst some users, as well as multiple buckets. As you walked through creating these users, hopefully you observed how easy it is to create a fully managed **AWS Transfer Family** server.
