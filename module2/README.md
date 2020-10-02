@@ -64,4 +64,4 @@ You may have noticed in this module, however, that the user that we created has 
 
 In the next module, we will leverage **logical directories** to demonstrate how to accomplish user separation and selective folder access. 
 
-Go to [Module 4](/module4/README.md).
+Go to [Module 3](/module3/README.md).
