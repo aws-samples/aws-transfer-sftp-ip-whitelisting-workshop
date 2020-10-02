@@ -1,6 +1,6 @@
-# **AWS Transfer for SFTP**
+# **AWS Transfer Family**
 
-### Using IP whitelisting to secure your AWS Transfer for SFTP servers
+### Using IP whitelisting and logical directories to secure your AWS Transfer Family servers
 
 © 2020 Amazon Web Services, Inc. and its affiliates. All rights reserved.
 This sample code is made available under the MIT-0 license. See the LICENSE file.

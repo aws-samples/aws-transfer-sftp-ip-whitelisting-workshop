@@ -1,6 +1,6 @@
-# **AWS Transfer for SFTP**
+# **AWS Transfer Family**
 
-### Using IP whitelisting to secure your AWS Transfer for SFTP servers
+### Using IP whitelisting and logical directories to secure your AWS Transfer Family servers
 
 © 2020 Amazon Web Services, Inc. and its affiliates. All rights reserved.
 This sample code is made available under the MIT-0 license. See the LICENSE file.
@@ -10,56 +10,109 @@ Errors or corrections? Contact [russboye@amazon.com](mailto:russboye@amazon.com)
 ---
 
 # Module 3
-## Testing your server whitelisting configuration
+## Creating organizational users powered by Logical Directories
 
-In this module, you will test access to your SFTP server either via your terminal on Linux or MacOS systems, or by using a third-party tool such as Cyberduck, WinSCP, or Filezilla. Before attempting to connect to the server, you must first return to the AWS SFTP console page for your server to [create a user account](https://docs.aws.amazon.com/transfer/latest/userguide/getting-started-add-user.html).
-
-Our example uses a Service-managed identity provider for the SFTP server, which authenticates users using SSH keys.  AWS Transfer for SFTP also supports custom authentication methods, which allows you to do [password authentication](https://aws.amazon.com/blogs/storage/enable-password-authentication-for-aws-transfer-for-sftp-using-aws-secrets-manager/), as well as authentication via [3rd party providers](https://aws.amazon.com/blogs/storage/using-okta-as-an-identity-provider-with-aws-transfer-for-sftp/).
+In this module, you will create a basic set of users to emulate how an organization might manage multiple user access while restricting each user to a specific directory and set of directories. Additionally, we will highlight how to create a user that has access to folders across multiple buckets, in order to ensure additional security and separation. 
 
 ## Module Steps
 
 #### Create a User Account
 
-In order to test our server, we will need to create a user that can log in to the server. In this example, we will be using Service-managed users, which are administered inside of the **AWS Transfer** console. 
+In order to create a Service managed user that has access limited to multiple specific directories, we will need to use the command line. For the purposes of this walk through, we will use a bash script to create each user, and examples will be provided below. Before scripting against the **AWS cli**, It would be a good idea to learn out to use an access key to cache your credentials on the server from which you wish to run your scripts. Follow [this link](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html) to learn more about **AWS Indentity and Access Management (IAM)** and managing and using access keys.
 
-**Note** Our example uses a Service-managed identity provider for the SFTP server, which authenticates users using SSH keys. AWS Transfer for SFTP also supports custom authentication methods, which allows you to do [password authentication](https://aws.amazon.com/blogs/storage/enable-password-authentication-for-aws-transfer-for-sftp-using-aws-secrets-manager/), as well as authentication via [3rd party providers](https://aws.amazon.com/blogs/storage/using-okta-as-an-identity-provider-with-aws-transfer-for-sftp/).
+For the purposes of this workshop, we will be adding users that have access to various **Logical Directories** which map to specific folders in our **Amazon S3** buckets.
 
-From the **AWS Transfer** [Console](https://console.aws.amazon.com/transfer/)
+The following table lays out the structure we will be building for our organization:
 
-Select your Transfer server by checking the box next to it, and click **Add user**
+  | **Username** | **Role** | **Bucket 1 Folders** | **Bucket 2 Folders** |
+  | --- | --- | --- | --- |
+  | user1 | External End User | /firm1, /common | --- |
+  | user2 | External End User | /firm2, /common | --- |
+  | admin | Internal Super User | /firm1, /firm2, /common | /rawdata, /processed |
+  | regulator | External Super User | --- | /rawdata, /processed |
 
-![](../images/transfer11.png)
+Before we create the user accounts, we should create the directories listed in the table above. 
 
-On the Add user page, fill in a Username (here we use standard as the username), and select the restricted role that the cloudformation template created in Module 1. For now we will not be using a Scope down policy, so leave None checked. 
+In order to create these user accounts, from the command line of a linux server we can execute the following bash script, substituting values from your environment in place of the *variables*
 
-![](../images/transfer12.png)
+#### For user1
 
-For the bucket, select the bucket described as Bucket 1 in your cloudformation template. In the blank for SSH public keys, you will need to enter the public SSH key portion of an SSH key pair that you have access to. For more information on SSH key pairs, including how to generate one, you can [follow this link.](https://docs.aws.amazon.com/transfer/latest/userguide/key-management.html#sshkeygen) For the remaining options, you can leave the defaults, and click **Add**
+<code>
+[root@ip-172-31-41-252 ~]# cat create_user.sh
+#! /bin/sh
 
-![](../images/transfer13.png)
+role_arn=`aws iam list-roles | grep -e "Arn.*transferworkshop-s3Bucket1IamRole-Q5W2BOA6ATBQ*" | awk '{print $2}' | sed -e 's/[,"]//g'`
+server_id=$1
+pub_key=`cat demokey.pub`
+
+mapping_1='Entry=/user1,Target=/transferworkshop1-1908cf20-044e-11eb-8ea9-027209769fbe/user1'
+mapping_2='Entry=/user1temp,Target=/transferworkshop1-1908cf20-044e-11eb-8ea9-027209769fbe/temp'
+
+aws transfer create-user --user-name user1 --server-id $server_id --role $role_arn --home-directory-type LOGICAL --home-directory-mappings $mapping_1 $mapping_2 --region us-east-2
+
+aws transfer import-ssh-public-key --user-name user1 --server-id $server_id --ssh-public-key-body "$pub_key" --region us-east-2
+</code>
 
 #### Test your Connection
 
-Once you’ve created a user account, you’re able to attempt to connect to your SFTP server using the private key that corresponds with the public key used during user creation. Using the hostname of your SFTP server, try to connect using your preferred SFTP client. At this point, you should experience a timeout, such as the one shown in the following screenshot. This is because your IP address has not been configured to reach the **VPC endpoint** over the appropriate port.
+Once you’ve created the user1 account, you’re able to connect to your SFTP server using the private key that corresponds with the public key used during user creation. Using the hostname of your SFTP server, try to connect using your preferred SFTP client. As user1, try to upload some files to the subdirectories you see once you log in. 
 
-![](../images/transfer8.png)
+![](../images/transfer15.png)
 
-Return to the settings page in the AWS Management Console for the Security Group your **AWS CloudFormation** template created earlier. On the settings page, choose the **Inbound Rules** tab, and choose **Edit inbound rules**. Select **SSH** as the **Type** - this automatically selects the appropriate protocol and port range for SFTP.  For the purposes of this exercise, select **My IP** under **Source type** - this automatically populates the IP address from which you logged into the console. Scroll to the bottom, and choose **Save rules**:
+Also, try viewing those uploads in the **Amazon S3** console. 
 
-![](../images/transfer9.png)
+![](../images/transfer16.png)
 
-You will now see an inbound rule in your security group that gives your IP address access to your VPC via port 22, which gives you access to your SFTP server.
+#### For user2
 
-Now that this rule is in place, attempt to connect to your session again from your SFTP client. As shown in the following screenshot, you should now be able to connect to your SFTP session. Optionally you can upload a file and view it in the S3 console.
+<code>
+[root@ip-172-31-41-252 ~]# cat create_user.sh
+#! /bin/sh
 
-![](../images/transfer10.png)
+role_arn=`aws iam list-roles | grep -e "Arn.*transferworkshop-s3Bucket1IamRole-Q5W2BOA6ATBQ*" | awk '{print $2}' | sed -e 's/[,"]//g'`
+server_id=$1
+pub_key=`cat demokey.pub`
+
+mapping_1='Entry=/user2,Target=/transferworkshop1-1908cf20-044e-11eb-8ea9-027209769fbe/user2'
+mapping_2='Entry=/user2temp,Target=/transferworkshop1-1908cf20-044e-11eb-8ea9-027209769fbe/temp'
+
+aws transfer create-user --user-name user2 --server-id $server_id --role $role_arn --home-directory-type LOGICAL --home-directory-mappings $mapping_1 $mapping_2 --region us-east-2
+
+aws transfer import-ssh-public-key --user-name user2 --server-id $server_id --ssh-public-key-body "$pub_key" --region us-east-2
+</code>
+
+#### Test your Connection
+
+Once you’ve created the user2 account, continue to test between each user, experimenting with what directories can be viewed and accessed on login. An important here is that the folder /temp in the first bucket is common across both users, but the **Logical Directory** for each maps to a different folder. This allows us to obscure the real name of the folder from the user logging in. In this case, this folder represents an area where different users downstream can share files with each other, without having direct **Amazon S3** Bucket access, or needing the ability to edit permissions.
+
+#### For regulator
+
+The code for creating the regulator access is slightly different, since both folders the regulator needs access to are in the 2nd bucket.
+
+<code>
+[root@ip-172-31-41-252 ~]# cat create_userreg.sh
+#! /bin/sh
+
+role_arn=`aws iam list-roles | grep -e "Arn.*transferworkshop-s3Bucket2IamRole-JGINRW7GI7KU" | awk '{print $2}' | sed -e 's/[,"]//g'`
+server_id=$1
+pub_key=`cat demokey.pub`
+
+mapping_1='Entry=/regulator,Target=/transferworkshop2-1908cf20-044e-11eb-8ea9-027209769fbe/processed'
+mapping_2='Entry=/rawdata,Target=/transferworkshop2-1908cf20-044e-11eb-8ea9-027209769fbe/rawdata'
+
+aws transfer create-user --user-name regulator --server-id $server_id --role $role_arn --home-directory-type LOGICAL --home-directory-mappings $mapping_1 $mapping_2 --region us-east-2
+
+aws transfer import-ssh-public-key --user-name regulator --server-id $server_id --ssh-public-key-body "$pub_key" --region us-east-2
+</code>
+
+#### Test your Connection
+
+Once you’ve created the regulator account, continue to test between each user, experimenting with what directories can be viewed and accessed on login.
 
 ## Module Summary
 
-In this module, you tested your ability to reach your AWS Transfer for SFTP server endpoint both with and without your IP address whitelisted. This demonstrates that non whitelisted traffic does not, in fact, actually even reach your AWS SFTP endpoint.
+In this module, you created several users to represent some common organizational structures encountered in real world workloads. This should give you a good idea of how to control user access across multiple folders, which may be common amongst some users, as well as multiple buckets. As you walked through creating these users, hopefully you observed how easy it is to create a fully managed **AWS Transfer Family** server.
 
-You may have noticed in this module, however, that the user that we created has access to the entire S3 bucket contents, and all subfolders. In a real world scenario, organizations require the ability to grant select users access to particular folders. 
-
-In the next module, we will leverage **logical directories** to demonstrate how to accomplish user separation and selective folder access. 
+In the next module, we will be cleaning up after today's workshop.
 
 Go to [Module 4](/module4/README.md).

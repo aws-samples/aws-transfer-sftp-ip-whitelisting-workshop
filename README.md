@@ -1,4 +1,4 @@
-# **AWS Transfer for SFTP**
+# **AWS Transfer Family**
 
 ### Using IP whitelisting to secure your AWS Transfer for SFTP servers
 
@@ -13,7 +13,7 @@ Errors or corrections? Contact [russboye@amazon.com](mailto:russboye@amazon.com)
 
 In your application workflow, it is necessary to receive files from external entities for exchanging sensitive information such as PHI (Personal Health Information) or financial records. It is critical that these transfers be secure and encrypted.
 
-After doing some research, you have decided to use [AWS Transfer for SFTP](https://aws.amazon.com/sftp) to receive this data from your business partners, which will allow this data to flow through an encrypted transport mechanism. In addition, your regulatory and/or Information Security guidelines dictate that only known partners are able to reach the endpoint, and this is controlled through the whitelisting of IPs. In addition, many of your partner entities face similar regulation, and need the ability to control outbound SFTP to a limited list of public IPs.
+After doing some research, you have decided to use [AWS Transfer Family](https://aws.amazon.com/transfer) to receive this data from your business partners via SFTP, which will allow this data to flow through an encrypted transport mechanism. In addition, your regulatory and/or Information Security guidelines dictate that only known partners are able to reach the endpoint, and this is controlled through the whitelisting of IPs. Many of your partner entities face similar regulation, and need the ability to control outbound SFTP to a limited list of public IPs.
 
 This workshop will walk you through this scenario, using CloudFormation templates to deploy resources and the AWS Management console to configure those resources accordingly.  As shown in the architecture diagram below, a VPC, two Elastic IPs, an Amazon S3 bucket, and an AWS Transfer for SFTP endpoint will be deployed as a part of this workshop.  
 
@@ -37,8 +37,9 @@ This workshop includes services that are not in the free tier, and may generate 
 This workshop consists of the following five modules:
 
 - **Module 1** - Complete Setup
-- **Module 2** - Complete Optional Setup
-- **Module 3** - Test Your Setup
+- **Module 2** - Test Your Setup with a Basic User
+- **Module 3** - Protect Your Data Access with Logical Directories
 - **Module 4** - Clean Up
+- **Optional Module 5** - Using VPC Peering to Allow Internal IP Access
 
 To get started, go to [Module 1](/module1/README.md).
