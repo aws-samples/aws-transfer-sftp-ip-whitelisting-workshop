@@ -9,6 +9,8 @@ Errors or corrections? Contact [russboye@amazon.com](mailto:russboye@amazon.com)
 
 ---
 
+<!--Final rev. for launch Oct 2020-->
+
 # Module 4
 ## Cleaning up after this workshop
 
@@ -29,6 +31,12 @@ The next thing we will want to delete is our **AWS Transfer** server itself, but
 Once the **AWS Transfer** server is **Offline**, you can check the same box, and from the **Actions** dropdown select Delete, type *delete* to confirm, and choose **Delete**
 
 ![](../images/transfer34.png)
+
+Additionally, as a last step, you will want to delete the environment you created with your **CloudFormation** template. To do this, return to the console page for **CloudFormation**, and click on your **Stack name**, then choose the **Resources** tab. At the top of the page, choose **Delete**, and on the pop up choose **Delete stack**
+
+![](../images/transfer35.png)
+
+The **CloudFormation** created resources will be deleted, and ultimately the **Stack** will no longer be visible in the console. This may require a refresh of the page.
 
 ## Module Summary
 

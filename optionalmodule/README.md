@@ -9,6 +9,8 @@ Errors or corrections? Contact [russboye@amazon.com](mailto:russboye@amazon.com)
 
 ---
 
+<!--Final rev. for launch Oct 2020-->
+
 # Optional Module 5
 ## Optional setup for private VPC access
 

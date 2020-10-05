@@ -9,6 +9,8 @@ Errors or corrections? Contact [russboye@amazon.com](mailto:russboye@amazon.com)
 
 ---
 
+<!--Final rev. for launch Oct 2020-->
+
 # Module 2
 ## Testing your server whitelisting configuration
 
