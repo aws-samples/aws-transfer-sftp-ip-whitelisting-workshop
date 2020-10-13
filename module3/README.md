@@ -43,7 +43,6 @@ In order to create the user accounts, from the command line of a linux server we
 #### For user1
 
 <code>
-[root@ip-172-31-41-252 ~]# cat create_user1.sh
 #! /bin/sh
 
 role_arn=`aws iam list-roles | grep -e "Arn.*AWSTransferWorkshopOct2020-s3Bucket1IamRole-6CA6GL68EO5S" | awk '{print $2}' | sed -e 's/[,"]//g'`
@@ -75,7 +74,6 @@ Also, try viewing those uploads in the **Amazon S3** console.
 #### For user2
 
 <code>
-[root@ip-172-31-41-252 ~]# cat create_user2.sh
 #! /bin/sh
 
 role_arn=`aws iam list-roles | grep -e "Arn.*AWSTransferWorkshopOct2020-s3Bucket1IamRole-6CA6GL68EO5S" | awk '{print $2}' | sed -e 's/[,"]//g'`
@@ -101,7 +99,6 @@ Once you’ve created the user2 account, continue to test between each user, exp
 The code for creating the regulator access is slightly different, since both folders the regulator needs access to are in the 2nd bucket.
 
 <code>
-[root@ip-172-31-41-252 ~]# cat create_userreg.sh
 #! /bin/sh
 
 role_arn=`aws iam list-roles | grep -e "Arn.*AWSTransferWorkshopOct2020-s3Bucket2IamRole-1GEPCONZOVSF" | awk '{print $2}' | sed -e 's/[,"]//g'`
@@ -128,7 +125,6 @@ The code for creating the admin account for full access is again different, but 
 2. This user has full access to all folders, and needs several more mappings parameters. 
 
 <code>
-[root@ip-172-31-41-252 ~]# cat create_useradmin.sh
 #! /bin/sh
 
 role_arn=`aws iam list-roles | grep -e "Arn.*AWSTransferWorkshopOct2020-s3BucketallIamRole-17L5BZ9RNZNO1" | awk '{print $2}' | sed -e 's/[,"]//g'`
