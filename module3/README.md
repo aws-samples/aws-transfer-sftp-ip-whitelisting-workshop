@@ -45,9 +45,11 @@ In order to create the user accounts, from the command line of a linux server we
 <code>
 #! /bin/sh
 
-role_arn=`aws iam list-roles | grep -e "Arn.*AWSTransferWorkshopOct2020-s3Bucket1IamRole-6CA6GL68EO5S" | awk '{print $2}' | sed -e 's/[,"]//g'`
+role_arn=\`aws iam list-roles | grep -e "Arn.*AWSTransferWorkshopOct2020-s3Bucket1IamRole-6CA6GL68EO5S" | awk '{print $2}' | sed -e 's/[,"]//g'\`
+
 server_id=$1
-pub_key=`cat demokey.pub`
+
+pub_key=\`cat demokey.pub\`
 
 mapping_1='Entry=/user1,Target=/awstransferworkshopbucket1-4be953a0-04e0-11eb-a8b7-0656208217bc/user1'
 mapping_2='Entry=/user1temp,Target=/awstransferworkshopbucket1-4be953a0-04e0-11eb-a8b7-0656208217bc/common'
@@ -76,9 +78,11 @@ Also, try viewing those uploads in the **Amazon S3** console.
 <code>
 #! /bin/sh
 
-role_arn=`aws iam list-roles | grep -e "Arn.*AWSTransferWorkshopOct2020-s3Bucket1IamRole-6CA6GL68EO5S" | awk '{print $2}' | sed -e 's/[,"]//g'`
+role_arn=\`aws iam list-roles | grep -e "Arn.*AWSTransferWorkshopOct2020-s3Bucket1IamRole-6CA6GL68EO5S" | awk '{print $2}' | sed -e 's/[,"]//g'`
+
 server_id=$1
-pub_key=`cat demokey.pub`
+
+pub_key=\`cat demokey.pub`
 
 mapping_1='Entry=/user2,Target=/awstransferworkshopbucket1-4be953a0-04e0-11eb-a8b7-0656208217bc/user2'
 mapping_2='Entry=/user2temp,Target=/awstransferworkshopbucket1-4be953a0-04e0-11eb-a8b7-0656208217bc/common'
@@ -101,9 +105,11 @@ The code for creating the regulator access is slightly different, since both fol
 <code>
 #! /bin/sh
 
-role_arn=`aws iam list-roles | grep -e "Arn.*AWSTransferWorkshopOct2020-s3Bucket2IamRole-1GEPCONZOVSF" | awk '{print $2}' | sed -e 's/[,"]//g'`
+role_arn=\`aws iam list-roles | grep -e "Arn.*AWSTransferWorkshopOct2020-s3Bucket2IamRole-1GEPCONZOVSF" | awk '{print $2}' | sed -e 's/[,"]//g'`
+
 server_id=$1
-pub_key=`cat demokey.pub`
+
+pub_key=\`cat demokey.pub`
 
 mapping_1='Entry=/rawdata,Target=/awstransferworkshopbucket2-4be953a0-04e0-11eb-a8b7-0656208217bc/rawdata'
 mapping_2='Entry=/processed,Target=/awstransferworkshopbucket2-4be953a0-04e0-11eb-a8b7-0656208217bc/processed'
@@ -127,9 +133,11 @@ The code for creating the admin account for full access is again different, but 
 <code>
 #! /bin/sh
 
-role_arn=`aws iam list-roles | grep -e "Arn.*AWSTransferWorkshopOct2020-s3BucketallIamRole-17L5BZ9RNZNO1" | awk '{print $2}' | sed -e 's/[,"]//g'`
+role_arn=\`aws iam list-roles | grep -e "Arn.*AWSTransferWorkshopOct2020-s3BucketallIamRole-17L5BZ9RNZNO1" | awk '{print $2}' | sed -e 's/[,"]//g'`
+
 server_id=$1
-pub_key=`cat demokey.pub`
+
+pub_key=\`cat demokey.pub`
 
 mapping_1='Entry=/user1,Target=/awstransferworkshopbucket1-4be953a0-04e0-11eb-a8b7-0656208217bc/user1'
 mapping_2='Entry=/user2,Target=/awstransferworkshopbucket1-4be953a0-04e0-11eb-a8b7-0656208217bc/user2'
