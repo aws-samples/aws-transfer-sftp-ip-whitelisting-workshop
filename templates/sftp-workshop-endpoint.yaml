@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: AWS DataSync Workshop - NFS Migration - On-Premises Region
+Description: AWS Transfer Family Workshop - IP Allow Listing
 Metadata:
   License:
     Description: |
@@ -153,11 +153,19 @@ Resources:
       PolicyDocument:
         Statement:
           - Effect: Allow
+            Action:
+            - s3:ListBucket
             Resource:
               - !GetAtt s3Bucket1.Arn
+          - Effect: Allow
+            Resource:
               - !Join [ "/", [ !GetAtt s3Bucket1.Arn, "*" ] ]
             Action:
-              - s3:*
+              - s3:PutObject
+              - s3:GetObject
+              - s3:DeleteObject
+              - s3:DeleteObjectVersion
+              - s3:GetObjectVersion
         Version: '2012-10-17'
       PolicyName: policy
       Roles:
@@ -176,20 +184,28 @@ Resources:
         Version: '2012-10-17'
   s3Bucket2RolePolicy:
     Type: AWS::IAM::Policy
-    DependsOn: s3Bucket1
+    DependsOn: s3Bucket2
     Properties:
       PolicyDocument:
         Statement:
           - Effect: Allow
+            Action:
+            - s3:ListBucket
             Resource:
               - !GetAtt s3Bucket2.Arn
+          - Effect: Allow
+            Resource:
               - !Join [ "/", [ !GetAtt s3Bucket2.Arn, "*" ] ]
             Action:
-              - s3:*
+              - s3:PutObject
+              - s3:GetObject
+              - s3:DeleteObject
+              - s3:DeleteObjectVersion
+              - s3:GetObjectVersion
         Version: '2012-10-17'
       PolicyName: policy
       Roles:
-        - !Ref 's3Bucket1IamRole'
+        - !Ref 's3Bucket2IamRole'
   s3BucketallIamRole:
     Type: AWS::IAM::Role
     Properties:
@@ -209,13 +225,21 @@ Resources:
       PolicyDocument:
         Statement:
           - Effect: Allow
+            Action:
+            - s3:ListBucket
             Resource:
               - !GetAtt s3Bucket1.Arn
               - !GetAtt s3Bucket2.Arn
+          - Effect: Allow
+            Resource:
               - !Join [ "/", [ !GetAtt s3Bucket1.Arn, "*" ] ]
               - !Join [ "/", [ !GetAtt s3Bucket2.Arn, "*" ] ]
             Action:
-              - s3:*
+              - s3:PutObject
+              - s3:GetObject
+              - s3:DeleteObject
+              - s3:DeleteObjectVersion
+              - s3:GetObjectVersion
         Version: '2012-10-17'
       PolicyName: policy
       Roles:
